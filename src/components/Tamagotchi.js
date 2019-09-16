@@ -4,9 +4,9 @@ import {TamagotchiDiv} from "./StyledComponents";
 
 export default class Tamagotchi extends Component {
     render() {
-        const {position = config.Status.ANGRY} = this.props;
+        const {status = config.Status.ANGRY} = this.props;
         return (
-            <TamagotchiDiv position={position}/>
+            <TamagotchiDiv position={status}/>
         )
     }
 }
