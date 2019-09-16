@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import tamagotchi from '../resources/tamagotchi.png';
+import {Row} from "reactstrap";
 
 export const TamagotchiDiv = styled.div`
     width: 100px;
@@ -11,4 +12,8 @@ export const TamagotchiDiv = styled.div`
     animation-name: infinite-spinning;
     animation-iteration-count: infinite;
     animation-direction: alternate;
+`;
+
+export const FullWidthRow = styled(Row)`
+    width: 100%;
 `;
