@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import tamagotchi from '../resources/tamagotchi.png';
-import {Row} from "reactstrap";
+import {Button, Container, Row} from "reactstrap";
+import config from "../config";
 
 export const TamagotchiDiv = styled.div`
     width: 100px;
@@ -16,4 +17,17 @@ export const TamagotchiDiv = styled.div`
 
 export const FullWidthRow = styled(Row)`
     width: 100%;
+`;
+
+export const MainContainer = styled(Container)`
+    background-image: ${props => props.status ? config.Status.BG_GRADIENT[props.status] : 'none'}
+`;
+
+export const ActionButtons = styled(Button)`
+    background-color: #ffc543 !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+    border: 3px solid #000000 !important;
+    outline: none;
+    margin: 10px;
 `;

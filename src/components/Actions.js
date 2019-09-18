@@ -1,16 +1,30 @@
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import config from '../config';
-import {Button} from "reactstrap";
+import {ActionButtons} from "./StyledComponents";
 
-export default class Actions extends Component {
+export default class Actions extends PureComponent {
 
     render() {
         const {onTamagotchiStatusChange} = this.props;
+        const Statuses = config.Status.IDS;
+        const Action = config.Status.ACTION;
+
         return (
             <>
-                <Button onClick={() => {
-                    onTamagotchiStatusChange(config.Status.FINISHED_EATING)
-                }}>Feed him</Button>
+                {Object.keys(Action).map((action, index) => (
+                    <ActionButtons
+                        key={"action-button-" + index}
+                        onClick={() => {
+                            onTamagotchiStatusChange(Statuses[action])
+                        }}>{Action[action]}</ActionButtons>
+                ))}
+
+                {/*<ActionButtons onClick={() => {
+                    onTamagotchiStatusChange(Statuses.FINISHED_EATING)
+                }}>Feed him</ActionButtons>
+                <ActionButtons onClick={() => {
+                    onTamagotchiStatusChange(Statuses.SLEEPING)
+                }}>Sleep</ActionButtons>*/}
             </>
         )
     }

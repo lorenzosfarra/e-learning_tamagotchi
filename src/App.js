@@ -1,18 +1,17 @@
 import React, {Component} from 'react';
 import './App.css';
-import {Col, Container} from "reactstrap";
-import Tamagotchi from "./components/Tamagotchi";
+import {Col} from "reactstrap";
 import config from "./config";
 import Actions from "./components/Actions";
-import {FullWidthRow} from "./components/StyledComponents";
+import {FullWidthRow, MainContainer, TamagotchiDiv} from "./components/StyledComponents";
 
 class App extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            status: config.Status.HUNGRY
-        }
+            status: config.Status.IDS.HUNGRY
+        };
     }
 
     setNewStatus(status) {
@@ -22,16 +21,16 @@ class App extends Component {
     render() {
         const {status} = this.state;
         return (
-            <Container className='gradient-container'>
+            <MainContainer status={status} className='gradient-container'>
                 <FullWidthRow>
-                    <Col xs='6' md={{size: 3, offset: 3}}>
-                        <Tamagotchi status={status}/>
+                    <Col xs='4' md={{size: 3, offset: 3}} className='d-flex align-items-center'>
+                        <TamagotchiDiv position={config.Status.SPRITE[status]}/>
                     </Col>
-                    <Col xs='6' md={{size: 3, offset: 0}} className='mt-3'>
+                    <Col xs='8' md={{size: 3, offset: 0}}>
                         <Actions onTamagotchiStatusChange={(status) => this.setNewStatus(status)}/>
                     </Col>
                 </FullWidthRow>
-            </Container>
+            </MainContainer>
         );
     }
 }
