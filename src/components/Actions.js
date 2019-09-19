@@ -1,6 +1,6 @@
 import React, {PureComponent} from 'react';
 import config from '../config';
-import {ActionButtons} from "./StyledComponents";
+import {ActionButton} from "./StyledComponents";
 
 export default class Actions extends PureComponent {
 
@@ -12,11 +12,11 @@ export default class Actions extends PureComponent {
         return (
             <>
                 {Object.keys(Action).map((action, index) => (
-                    <ActionButtons
+                    <ActionButton
                         key={"action-button-" + index}
                         onClick={() => {
                             onTamagotchiStatusChange(Statuses[action])
-                        }}>{Action[action]}</ActionButtons>
+                        }}>{Action[action]}</ActionButton>
                 ))}
 
                 {/*<ActionButtons onClick={() => {

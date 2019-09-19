@@ -23,11 +23,17 @@ export const MainContainer = styled(Container)`
     background-image: ${props => props.status ? config.Status.BG_GRADIENT[props.status] : 'none'}
 `;
 
-export const ActionButtons = styled(Button)`
+export const ActionButton = styled(Button)`
     background-color: #ffc543 !important;
     color: #000000 !important;
     font-weight: bold !important;
     border: 3px solid #000000 !important;
     outline: none;
     margin: 10px;
+`;
+
+export const FormButton = styled(ActionButton)`
+    background-color: #6600cc !important;
+    color: #FFFFFF !important;
+    border: 3px solid #FFFFFF !important;
 `;

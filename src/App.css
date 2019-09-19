@@ -13,6 +13,7 @@ html, body, .gradient-container {
     justify-content: center;
     min-height: 100vh;
     min-width: 100%;
+    flex-direction: column;
 }
 
 @keyframes App-logo-spin {
