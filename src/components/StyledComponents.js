@@ -37,3 +37,7 @@ export const FormButton = styled(ActionButton)`
     color: #FFFFFF !important;
     border: 3px solid #FFFFFF !important;
 `;
+
+export const LoadingComponent = styled.div`
+    min-height: 100vh;
+`;

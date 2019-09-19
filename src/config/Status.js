@@ -13,7 +13,10 @@ const StatusSprite = Object.freeze({
     PLAYING: [0, 200],
     PLAYING2: [300, 200],
     DIRTY: [300, 305],
-    DEAD: [100, 100]
+    DEAD: [100, 100],
+
+    // FAKE STATUS - LOADING
+    LOADING: [300, 100]
 });
 
 const StatusIds = Object.freeze({

@@ -5,6 +5,7 @@ import config from "./config";
 import Actions from "./components/Actions";
 import {FormButton, FullWidthRow, MainContainer, TamagotchiDiv} from "./components/StyledComponents";
 import FirebaseLib from "./libs/FirebaseLib";
+import Loading from "./components/Loading";
 
 class App extends Component {
 
@@ -13,10 +14,27 @@ class App extends Component {
         this.state = {
             status: config.Status.IDS.HUNGRY,
             name: {
-                editStatus: 'normal',
+                editStatus: config.UI.EDIT_STATUS.NORMAL,
                 value: ''
-            }
+            },
+
+            // Has data from Firestore laoded yet?
+            dbLoaded: false
         };
+    }
+
+    async componentDidMount() {
+        const db = FirebaseLib.FIRESTORE_DB;
+        const snap = await db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_NAME)
+            .get();
+        if (!snap.exists) {
+            this.setState({dbLoaded: true});
+        } else {
+            const {name: nameObject} = this.state;
+            const name = snap.data().value;
+            this.setState({dbLoaded: true, name: {...nameObject, value: name}});
+        }
+
     }
 
     /**
@@ -47,21 +65,20 @@ class App extends Component {
         const db = FirebaseLib.FIRESTORE_DB;
 
         try {
-            await db.collection('info').doc('name')
+            await db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_NAME)
                 .set({value: name});
             this.setState({
-                name: {...nameObject, editStatus: 'saved'}
+                name: {...nameObject, editStatus: config.UI.EDIT_STATUS.SAVED}
             });
             setTimeout(() => {
                 _this.setState({
-                    name: {...nameObject, editStatus: 'normal'}
+                    name: {...nameObject, editStatus: config.UI.EDIT_STATUS.NORMAL}
                 });
             }, 3000);
         } catch (err) {
             console.error("Unable to save the name in the DB", err);
             // TODO: editStatus --> Error
         }
-
     }
 
     /**
@@ -70,23 +87,26 @@ class App extends Component {
     editName() {
         const {name: nameObject} = this.state;
         this.setState({
-            name: {...nameObject, editStatus: 'editing'}
+            name: {...nameObject, editStatus: config.UI.EDIT_STATUS.EDITING}
         });
     }
 
     render() {
-        const {status, name} = this.state;
+        const {status, name, dbLoaded} = this.state;
+        if (!dbLoaded) {
+            return <Loading/>;
+        }
         return (
             <MainContainer status={status} className='gradient-container'>
                 <FullWidthRow>
                     <Col xs='12' className='d-flex justify-content-center'>
                         {
-                            (name.editStatus === 'saved') ?
+                            (name.editStatus === config.UI.EDIT_STATUS.SAVED) ?
                                 <Alert color='success'>
                                     Name saved successfully!
                                 </Alert> :
 
-                                (name.editStatus === 'editing') ?
+                                (name.editStatus === config.UI.EDIT_STATUS.EDITING) ?
                                     <Form inline>
                                         <FormGroup>
                                             <Input type='text'
