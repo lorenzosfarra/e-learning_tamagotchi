@@ -7,6 +7,7 @@ import {FormButton, FullWidthRow, MainContainer, Name, TamagotchiDiv} from "./co
 import FirebaseLib from "./libs/FirebaseLib";
 import Loading from "./components/Loading";
 import * as firebase from "firebase";
+import History from "./components/History";
 
 class App extends Component {
 
@@ -23,6 +24,8 @@ class App extends Component {
                 value: config.Status.IDS.HUNGRY,
                 startedAt: null
             },
+            statusList: [],
+
             name: {
                 editStatus: config.UI.EDIT_STATUS.NORMAL,
                 value: ''
@@ -60,9 +63,11 @@ class App extends Component {
                 });
                 const {dbLoaded} = _this.state;
                 if (history.length > 0) {
+                    const currentStatus = history.shift();
                     _this.setState({
                         dbLoaded: {...dbLoaded, status: true},
-                        status: history[0]
+                        status: currentStatus,
+                        statusList: history
                     });
                 } else {
                     _this.setState({dbLoaded: {...dbLoaded, status: true}});
@@ -116,6 +121,13 @@ class App extends Component {
         }
     }
 
+    _fakeTimeout(ms) {
+        this._clearStatusTimeout();
+        return new Promise(resolve => {
+            this.statusTimeout = setTimeout(resolve, ms);
+        });
+    }
+
     /**
      * Save the status into our Firestore DB
      */
@@ -143,10 +155,9 @@ class App extends Component {
         if (item) {
             const _this = this;
             const next = config.Status.TIMEOUTS_AND_NEXT_STATUSES[item];
-            this._clearStatusTimeout();
-            this.statusTimeout = setTimeout(() => {
-                _this.saveStatus(next.status);
-            }, next.timeout);
+
+            await _this._fakeTimeout(next.timeout);
+            await _this.saveStatus(next.status);
         }
     }
 
@@ -161,7 +172,7 @@ class App extends Component {
     }
 
     render() {
-        const {status, name, dbLoaded} = this.state;
+        const {status, statusList, name, dbLoaded} = this.state;
         if (!dbLoaded.name || !dbLoaded.status) {
             return <Loading/>;
         }
@@ -193,12 +204,17 @@ class App extends Component {
                     </Col>
                 </FullWidthRow>
                 <FullWidthRow>
-                    <Col xs='4' md={{size: 3, offset: 3}} className='d-flex align-items-center'>
+                    <Col xs='5' md={{size: 3, offset: 3}} className='d-flex align-items-center'>
                         <TamagotchiDiv position={config.Status.SPRITE[status.value]}/>
                     </Col>
-                    <Col xs='8' md={{size: 3, offset: 0}}>
+                    <Col xs='7' md={{size: 3, offset: 0}}>
                         <Actions currentStatus={status.value}
                                  onTamagotchiStatusChange={(status) => this.saveStatus(status)}/>
+                    </Col>
+                </FullWidthRow>
+                <FullWidthRow>
+                    <Col xs='12' className={'d-flex justify-content-center'}>
+                        <History list={statusList}/>
                     </Col>
                 </FullWidthRow>
             </MainContainer>

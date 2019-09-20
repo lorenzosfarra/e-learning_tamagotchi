@@ -2,6 +2,7 @@ import styled from "styled-components";
 import tamagotchi from '../resources/tamagotchi.png';
 import {Button, Container, Row} from "reactstrap";
 import config from "../config";
+import {Timeline, TimelineEvent} from "react-event-timeline";
 
 export const TamagotchiDiv = styled.div`
     width: 100px;
@@ -17,6 +18,7 @@ export const TamagotchiDiv = styled.div`
 
 export const FullWidthRow = styled(Row)`
     width: 100%;
+    margin-top: 20px;
 `;
 
 export const MainContainer = styled(Container)`
@@ -49,4 +51,22 @@ export const Name = styled.p`
     padding: 5px 20px;
     border: 3px solid #000000 !important;
     border-radius: 8px;
+`;
+
+export const TimeLineCustomEvent = styled(TimelineEvent)`
+    text-transform: uppercase;
+    background-color: #e7e5e4;
+    font-weight: bold;
+    padding: 5px 20px;
+    border: 3px solid #000000 !important;
+    border-radius: 8px;
+    
+    div {
+        color: #333333;
+        background-color: transparent !important;
+    }
+`;
+
+export const TimeLineCustom = styled(Timeline)`
+    width: 100% !important;
 `;

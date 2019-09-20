@@ -6,7 +6,7 @@ const StatusSprite = Object.freeze({
     BORED: [0, 530],
     ANNOYED: [300, 530],
     FINE: [190, 530],
-    SLEEPING: [100, 410],
+    SLEEPING: [87, 410],
     ANGRY: [405, 305],
     HUNGRY: [195, 305],
     FINISHED_EATING: [508, 300],
