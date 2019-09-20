@@ -40,10 +40,22 @@ const StatusIds = Object.freeze({
 const StatusAction = Object.freeze({
     CLEAN: 'CLEAN',
     MUSIC: 'PLAY MUSIC',
-    LOVE: 'MEET GIRLFRIEND',
+    LOVE: 'MEET LOVER',
     SLEEPING: 'SLEEP',
     FINISHED_EATING: 'EAT',
     PLAYING: 'PLAY'
+});
+
+const StatusActionTimeoutAndNextStatus = Object.freeze({
+    CLEAN: {timeout: 3000, status: StatusIds.ANNOYED},
+    MUSIC: {timeout: 4000, status: StatusIds.BORED},
+    LOVE: {timeout: 5000, status: StatusIds.FINE},
+    SLEEPING: {timeout: 5000, status: StatusIds.HUNGRY},
+    FINISHED_EATING: {timeout: 4000, status: StatusIds.BORED},
+    PLAYING: {timeout: 3000, status: StatusIds.PLAYING2},
+    PLAYING2: {timeout: 3000, status: StatusIds.DIRTY},
+    FINE: {timeout: 3000, status: StatusIds.ANNOYED},
+    HUNGRY: {timeout: 10000, status: StatusIds.DEAD},
 });
 
 const StatusBackgroundGradient = Object.freeze({
@@ -68,7 +80,8 @@ const Status = {
     IDS: StatusIds,
     SPRITE: StatusSprite,
     BG_GRADIENT: StatusBackgroundGradient,
-    ACTION: StatusAction
+    ACTION: StatusAction,
+    TIMEOUTS_AND_NEXT_STATUSES: StatusActionTimeoutAndNextStatus
 };
 
 export default Status;

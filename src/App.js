@@ -34,6 +34,8 @@ class App extends Component {
                 status: false
             }
         };
+
+        this.statusTimeout = null;
     }
 
     componentDidMount() {
@@ -62,6 +64,11 @@ class App extends Component {
     componentWillUnmount() {
         this.Listeners.nameChangeUnsubcriber();
         this.Listeners.statusChangedUnsubscriber();
+    }
+
+    _clearStatusTimeout() {
+        clearTimeout(this.statusTimeout);
+        this.statusTimeout = null;
     }
 
     /**
@@ -105,11 +112,20 @@ class App extends Component {
      */
     async saveStatus(status) {
         const db = FirebaseLib.FIRESTORE_DB;
-
         try {
             const now = firebase.firestore.Timestamp.now();
             await db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_STATUS)
                 .set({value: status, startedAt: now});
+            const timeoutAndNextKeys = Object.keys(config.Status.TIMEOUTS_AND_NEXT_STATUSES);
+            const item = timeoutAndNextKeys.find((key) => (key === status));
+            if (item) {
+                const _this = this;
+                const next = config.Status.TIMEOUTS_AND_NEXT_STATUSES[item];
+                this._clearStatusTimeout();
+                this.statusTimeout = setTimeout(() => {
+                    _this.saveStatus(next.status);
+                }, next.timeout);
+            }
         } catch (err) {
             console.error("Unable to save the status in the DB", err);
             // TODO: saveStatus --> Error
