@@ -41,3 +41,12 @@ export const FormButton = styled(ActionButton)`
 export const LoadingComponent = styled.div`
     min-height: 100vh;
 `;
+
+export const Name = styled.p`
+    text-transform: uppercase;
+    background-color: #e7e5e4;
+    font-weight: bold;
+    padding: 5px 20px;
+    border: 3px solid #000000 !important;
+    border-radius: 8px;
+`;

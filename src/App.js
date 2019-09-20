@@ -3,46 +3,65 @@ import './App.css';
 import {Alert, Col, Form, FormGroup, Input} from "reactstrap";
 import config from "./config";
 import Actions from "./components/Actions";
-import {FormButton, FullWidthRow, MainContainer, TamagotchiDiv} from "./components/StyledComponents";
+import {FormButton, FullWidthRow, MainContainer, Name, TamagotchiDiv} from "./components/StyledComponents";
 import FirebaseLib from "./libs/FirebaseLib";
 import Loading from "./components/Loading";
+import * as firebase from "firebase";
 
 class App extends Component {
 
     constructor(props) {
         super(props);
+
+        this.Listeners = {
+            nameChangeUnsubcriber: null,
+            statusChangedUnsubscriber: null
+        };
+
         this.state = {
-            status: config.Status.IDS.HUNGRY,
+            status: {
+                value: config.Status.IDS.HUNGRY,
+                startedAt: null
+            },
             name: {
                 editStatus: config.UI.EDIT_STATUS.NORMAL,
                 value: ''
             },
 
-            // Has data from Firestore laoded yet?
-            dbLoaded: false
+            // Has data from Firestore loaded yet?
+            dbLoaded: {
+                name: false,
+                status: false
+            }
         };
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         const db = FirebaseLib.FIRESTORE_DB;
-        const snap = await db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_NAME)
-            .get();
-        if (!snap.exists) {
-            this.setState({dbLoaded: true});
-        } else {
-            const {name: nameObject} = this.state;
-            const name = snap.data().value;
-            this.setState({dbLoaded: true, name: {...nameObject, value: name}});
-        }
-
+        this.Listeners.nameChangeUnsubcriber = db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_NAME)
+            .onSnapshot((snap) => {
+                if (snap.exists) {
+                    const {name: nameObject, dbLoaded} = this.state;
+                    const name = snap.data().value;
+                    this.setState({dbLoaded: {...dbLoaded, name: true}, name: {...nameObject, value: name}});
+                }
+            });
+        this.Listeners.statusChangedUnsubscriber = db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_STATUS)
+            .onSnapshot((snap) => {
+                if (snap.exists) {
+                    const {dbLoaded} = this.state;
+                    const status = snap.data();
+                    this.setState({
+                        dbLoaded: {...dbLoaded, status: true},
+                        status: {startedAt: status.startedAt.toDate(), value: status.value}
+                    });
+                }
+            });
     }
 
-    /**
-     * Change the state in order to have a new status
-     * @param status
-     */
-    setNewStatus(status) {
-        this.setState({status});
+    componentWillUnmount() {
+        this.Listeners.nameChangeUnsubcriber();
+        this.Listeners.statusChangedUnsubscriber();
     }
 
     /**
@@ -77,7 +96,23 @@ class App extends Component {
             }, 3000);
         } catch (err) {
             console.error("Unable to save the name in the DB", err);
-            // TODO: editStatus --> Error
+            // TODO: saveName --> Error
+        }
+    }
+
+    /**
+     * Save the status into our Firestore DB
+     */
+    async saveStatus(status) {
+        const db = FirebaseLib.FIRESTORE_DB;
+
+        try {
+            const now = firebase.firestore.Timestamp.now();
+            await db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_STATUS)
+                .set({value: status, startedAt: now});
+        } catch (err) {
+            console.error("Unable to save the status in the DB", err);
+            // TODO: saveStatus --> Error
         }
     }
 
@@ -93,11 +128,11 @@ class App extends Component {
 
     render() {
         const {status, name, dbLoaded} = this.state;
-        if (!dbLoaded) {
+        if (!dbLoaded.name || !dbLoaded.status) {
             return <Loading/>;
         }
         return (
-            <MainContainer status={status} className='gradient-container'>
+            <MainContainer status={status.value} className='gradient-container'>
                 <FullWidthRow>
                     <Col xs='12' className='d-flex justify-content-center'>
                         {
@@ -118,17 +153,18 @@ class App extends Component {
                                             <FormButton onClick={() => this.saveName()}>Save</FormButton>
                                         </FormGroup>
                                     </Form> :
-                                    <p>{name.value ? name.value : 'N.A.'}<FormButton
-                                        onClick={() => this.editName()}>Change</FormButton></p>
+                                    <Name>{name.value ? name.value : 'N.A.'}<FormButton
+                                        onClick={() => this.editName()}>Change</FormButton></Name>
                         }
                     </Col>
                 </FullWidthRow>
                 <FullWidthRow>
                     <Col xs='4' md={{size: 3, offset: 3}} className='d-flex align-items-center'>
-                        <TamagotchiDiv position={config.Status.SPRITE[status]}/>
+                        <TamagotchiDiv position={config.Status.SPRITE[status.value]}/>
                     </Col>
                     <Col xs='8' md={{size: 3, offset: 0}}>
-                        <Actions onTamagotchiStatusChange={(status) => this.setNewStatus(status)}/>
+                        <Actions currentStatus={status.value}
+                                 onTamagotchiStatusChange={(status) => this.saveStatus(status)}/>
                     </Col>
                 </FullWidthRow>
             </MainContainer>

@@ -5,26 +5,28 @@ import {ActionButton} from "./StyledComponents";
 export default class Actions extends PureComponent {
 
     render() {
-        const {onTamagotchiStatusChange} = this.props;
+        const {onTamagotchiStatusChange, currentStatus} = this.props;
         const Statuses = config.Status.IDS;
         const Action = config.Status.ACTION;
 
         return (
             <>
                 {Object.keys(Action).map((action, index) => (
-                    <ActionButton
-                        key={"action-button-" + index}
-                        onClick={() => {
-                            onTamagotchiStatusChange(Statuses[action])
-                        }}>{Action[action]}</ActionButton>
+                    (currentStatus === Statuses[action]) ?
+                        <ActionButton
+                            key={"action-button-" + index}
+                            disabled
+                            onClick={() => {
+                                onTamagotchiStatusChange(Statuses[action])
+                            }}>{Action[action]}</ActionButton>
+                        :
+                        <ActionButton
+                            key={"action-button-" + index}
+                            onClick={() => {
+                                onTamagotchiStatusChange(Statuses[action])
+                            }}>{Action[action]}</ActionButton>
                 ))}
 
-                {/*<ActionButtons onClick={() => {
-                    onTamagotchiStatusChange(Statuses.FINISHED_EATING)
-                }}>Feed him</ActionButtons>
-                <ActionButtons onClick={() => {
-                    onTamagotchiStatusChange(Statuses.SLEEPING)
-                }}>Sleep</ActionButtons>*/}
             </>
         )
     }
