@@ -40,6 +40,7 @@ class App extends Component {
 
     componentDidMount() {
         const db = FirebaseLib.FIRESTORE_DB;
+        const _this = this;
         this.Listeners.nameChangeUnsubcriber = db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_NAME)
             .onSnapshot((snap) => {
                 if (snap.exists) {
@@ -48,15 +49,23 @@ class App extends Component {
                     this.setState({dbLoaded: {...dbLoaded, name: true}, name: {...nameObject, value: name}});
                 }
             });
-        this.Listeners.statusChangedUnsubscriber = db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_STATUS)
-            .onSnapshot((snap) => {
-                if (snap.exists) {
-                    const {dbLoaded} = this.state;
-                    const status = snap.data();
-                    this.setState({
+        this.Listeners.statusChangedUnsubscriber = db.collection(config.DBPaths.HISTORY)
+            .orderBy('startedAt', 'desc')
+            .limit(config.UI.STATUSES_LIMIT)
+            .onSnapshot(function (querySnapshot) {
+                const history = [];
+                querySnapshot.forEach(function (doc) {
+                    const status = doc.data();
+                    history.push({value: status.value, startedAt: status.startedAt.toDate()});
+                });
+                const {dbLoaded} = _this.state;
+                if (history.length > 0) {
+                    _this.setState({
                         dbLoaded: {...dbLoaded, status: true},
-                        status: {startedAt: status.startedAt.toDate(), value: status.value}
+                        status: history[0]
                     });
+                } else {
+                    _this.setState({dbLoaded: {...dbLoaded, status: true}});
                 }
             });
     }
@@ -113,22 +122,31 @@ class App extends Component {
     async saveStatus(status) {
         const db = FirebaseLib.FIRESTORE_DB;
         try {
+            const ref = db.collection(config.DBPaths.HISTORY).doc();
             const now = firebase.firestore.Timestamp.now();
-            await db.collection(config.DBPaths.INFO).doc(config.DBPaths.INFO_STATUS)
-                .set({value: status, startedAt: now});
-            const timeoutAndNextKeys = Object.keys(config.Status.TIMEOUTS_AND_NEXT_STATUSES);
-            const item = timeoutAndNextKeys.find((key) => (key === status));
-            if (item) {
-                const _this = this;
-                const next = config.Status.TIMEOUTS_AND_NEXT_STATUSES[item];
-                this._clearStatusTimeout();
-                this.statusTimeout = setTimeout(() => {
-                    _this.saveStatus(next.status);
-                }, next.timeout);
-            }
+            await ref.set({value: status, startedAt: now});
+            this._checkNext(status);
         } catch (err) {
             console.error("Unable to save the status in the DB", err);
             // TODO: saveStatus --> Error
+        }
+    }
+
+    /**
+     * Check the next status and how much time the current one will last
+     * @param status
+     * @private
+     */
+    async _checkNext(status) {
+        const timeoutAndNextKeys = Object.keys(config.Status.TIMEOUTS_AND_NEXT_STATUSES);
+        const item = timeoutAndNextKeys.find((key) => (key === status));
+        if (item) {
+            const _this = this;
+            const next = config.Status.TIMEOUTS_AND_NEXT_STATUSES[item];
+            this._clearStatusTimeout();
+            this.statusTimeout = setTimeout(() => {
+                _this.saveStatus(next.status);
+            }, next.timeout);
         }
     }
 
